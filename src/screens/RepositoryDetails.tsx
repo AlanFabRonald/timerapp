@@ -113,8 +113,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingTop: StatusBar.currentHeight || 16,
-    paddingBottom: 16,
+    paddingVertical:10,
     elevation: 4,
   },
   appBarTitle: {

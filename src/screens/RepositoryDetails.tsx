@@ -9,7 +9,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 
 export default function RepositoryDetails({ route }) {
   const navigation = useNavigation();
-
+  
   useEffect(() => {
     const loadTheme = async () => {
       const savedTheme = await AsyncStorage.getItem('theme');
@@ -23,19 +23,23 @@ export default function RepositoryDetails({ route }) {
   }, []);
 
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const { repository } = route.params;
+  const { repository } = route.params || {}; // Null check for route params
   const dispatch = useDispatch();
   const favorites = useSelector((state) => state.favorites);
   const [isFavorite, setIsFavorite] = useState(false);
   const [contributors, setContributors] = useState([]);
 
   useEffect(() => {
-    const existingFavorite = favorites.find((item) => item.id === repository.id);
-    setIsFavorite(!!existingFavorite);
-    fetch(`${repository.contributors_url}`)
-      .then((response) => response.json())
-      .then((data) => setContributors(data))
-      .catch((error) => console.error('Error fetching contributors:', error));
+    if (repository) {
+      const existingFavorite = favorites.find((item) => item.id === repository.id);
+      setIsFavorite(!!existingFavorite);
+      if (repository.contributors_url) {
+        fetch(`${repository.contributors_url}`)
+          .then((response) => response.json())
+          .then((data) => setContributors(data || [])) // Ensure data is not null
+          .catch((error) => console.error('Error fetching contributors:', error));
+      }
+    }
   }, [favorites, repository]);
 
   const handleToggleFavorite = () => {
@@ -46,28 +50,32 @@ export default function RepositoryDetails({ route }) {
     }
   };
 
-  const creationDate = format(new Date(repository.created_at), 'MMMM dd, yyyy');
-  const lastUpdateDate = format(new Date(repository.updated_at), 'MMMM dd, yyyy');
+  const creationDate = repository?.created_at ? format(new Date(repository.created_at), 'MMMM dd, yyyy') : 'N/A';
+  const lastUpdateDate = repository?.updated_at ? format(new Date(repository.updated_at), 'MMMM dd, yyyy') : 'N/A';
+
+  if (!repository) {
+    return <Text>Repository not found.</Text>;
+  }
 
   return (
     <View style={{ flex: 1 }}>
       <View style={[styles.appBar, {
         backgroundColor: isDarkMode ? '#1F1F1F' : '#2196F3',
       }]}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
+       <TouchableOpacity onPress={() => navigation.goBack()}>
           <Icon name="arrow-back" size={24} color="white" />
         </TouchableOpacity>
         <Text style={styles.appBarTitle}>Repository Details</Text>
       </View>
       <ScrollView style={[styles.container, { backgroundColor: isDarkMode ? '#121212' : 'white' }]}>
         <View style={[styles.card, { backgroundColor: isDarkMode ? '#1F1F1F' : 'white' }]}>
-          <Image source={{ uri: repository.owner.avatar_url }} style={styles.image} />
-          <Text style={[styles.repoName, { color: isDarkMode ? 'white' : 'black' }]}>{repository.name}</Text>
-          <Text style={[styles.Text, { color: isDarkMode ? 'white' : 'gray' }]}>Owner: {repository.owner.login}</Text>
-          <Text style={[styles.description, { color: isDarkMode ? 'white' : 'gray' }]}>Description: {repository.description}</Text>
-          <Text style={[styles.Text, { color: isDarkMode ? 'white' : 'gray' }]}>Stars: {repository.stargazers_count}</Text>
-          <Text style={[styles.Text, { color: isDarkMode ? 'white' : 'gray' }]}>Forks: {repository.forks_count}</Text>
-          <Text style={[styles.Text, { color: isDarkMode ? 'white' : 'gray' }]}>Language: {repository.language}</Text>
+          <Image source={{ uri: repository.owner?.avatar_url }} style={styles.image} />
+          <Text style={[styles.repoName, { color: isDarkMode ? 'white' : 'black' }]}>{repository.name || 'No name available'}</Text>
+          <Text style={[styles.Text, { color: isDarkMode ? 'white' : 'gray' }]}>Owner: {repository.owner?.login || 'Unknown'}</Text>
+          <Text style={[styles.description, { color: isDarkMode ? 'white' : 'gray' }]}>Description: {repository.description || 'No description available'}</Text>
+          <Text style={[styles.Text, { color: isDarkMode ? 'white' : 'gray' }]}>Stars: {repository.stargazers_count || 0}</Text>
+          <Text style={[styles.Text, { color: isDarkMode ? 'white' : 'gray' }]}>Forks: {repository.forks_count || 0}</Text>
+          <Text style={[styles.Text, { color: isDarkMode ? 'white' : 'gray' }]}>Language: {repository.language || 'Not specified'}</Text>
           <Text style={[styles.Text, { color: isDarkMode ? 'white' : 'gray' }]}>Created On: {creationDate}</Text>
           <Text style={[styles.Text, { color: isDarkMode ? 'white' : 'gray' }]}>Last Updated: {lastUpdateDate}</Text>
           <View style={styles.buttonContainer}>

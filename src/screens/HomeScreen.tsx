@@ -16,36 +16,47 @@ import { searchRepositories } from '../redux/repositoriesSlice';
 import NetInfo from '@react-native-community/netinfo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/Ionicons';
+
 export default function HomeScreen({ navigation }) {
   const [query, setQuery] = useState('');
   const [isConnected, setIsConnected] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const dispatch = useDispatch();
-  const { repositories, loading, error } = useSelector((state) => state.repositories);
+  const { repositories, loading, error } = useSelector((state) => state?.repositories || {});
 
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener((state) => {
-      setIsConnected(state.isConnected);
+      if (state?.isConnected !== null) {
+        setIsConnected(state.isConnected);
+      }
     });
     return () => unsubscribe();
   }, []);
 
   useEffect(() => {
     const loadTheme = async () => {
-      const savedTheme = await AsyncStorage.getItem('theme');
-      if (savedTheme) {
-        setIsDarkMode(savedTheme === 'dark');
-      } else {
-        setIsDarkMode(Appearance.getColorScheme() === 'dark');
+      try {
+        const savedTheme = await AsyncStorage.getItem('theme');
+        if (savedTheme) {
+          setIsDarkMode(savedTheme === 'dark');
+        } else {
+          setIsDarkMode(Appearance.getColorScheme() === 'dark');
+        }
+      } catch (error) {
+        console.log('Error loading theme:', error);
       }
     };
     loadTheme();
   }, []);
 
   const toggleDarkMode = async () => {
-    const newTheme = !isDarkMode ? 'dark' : 'light';
-    await AsyncStorage.setItem('theme', newTheme);
-    setIsDarkMode(!isDarkMode);
+    try {
+      const newTheme = !isDarkMode ? 'dark' : 'light';
+      await AsyncStorage.setItem('theme', newTheme);
+      setIsDarkMode(!isDarkMode);
+    } catch (error) {
+      console.log('Error toggling theme:', error);
+    }
   };
 
   const search = () => {
@@ -55,30 +66,41 @@ export default function HomeScreen({ navigation }) {
   };
 
   return (
-    <SafeAreaView style={[styles.container, {
-      backgroundColor: isDarkMode ? '#121212' : 'white',
-    }]}>
-      <View style={[styles.appBar, {
-        backgroundColor: isDarkMode ? '#1F1F1F' : '#2196F3',
-      }]}>
+    <SafeAreaView
+      style={[
+        styles.container,
+        {
+          backgroundColor: isDarkMode ? '#121212' : 'white',
+        },
+      ]}
+    >
+      <View
+        style={[
+          styles.appBar,
+          {
+            backgroundColor: isDarkMode ? '#1F1F1F' : '#2196F3',
+          },
+        ]}
+      >
         <Text style={styles.appBarTitle}>GitHub Explorer</Text>
         <TouchableOpacity onPress={toggleDarkMode}>
-          <Icon
-            name={isDarkMode ? 'sunny' : 'moon'}
-            size={24}
-            color="white"
-          />
+          <Icon name={isDarkMode ? 'sunny' : 'moon'} size={24} color="white" />
         </TouchableOpacity>
       </View>
 
-      {!isConnected && <Text style={styles.noConnectionText}>No Internet Connection</Text>}
+      {!isConnected && (
+        <Text style={styles.noConnectionText}>No Internet Connection</Text>
+      )}
       <View style={styles.searchContainer}>
         <TextInput
-          style={[styles.input, {
-            borderColor: isDarkMode ? '#555' : '#ccc',
-            color: isDarkMode ? 'white' : 'black',
-            backgroundColor: isDarkMode ? '#333' : 'white',
-          }]}
+          style={[
+            styles.input,
+            {
+              borderColor: isDarkMode ? '#555' : '#ccc',
+              color: isDarkMode ? 'white' : 'black',
+              backgroundColor: isDarkMode ? '#333' : 'white',
+            },
+          ]}
           placeholder="Search repositories..."
           placeholderTextColor={isDarkMode ? '#aaa' : '#888'}
           value={query}
@@ -87,20 +109,59 @@ export default function HomeScreen({ navigation }) {
         />
         <Button title="Search" onPress={search} />
       </View>
-      {loading && <Text style={{ color: isDarkMode ? 'white' : 'black', textAlign: 'center' }}>Loading...</Text>}
-      {error && <Text style={{ color: isDarkMode ? 'white' : 'black', textAlign: 'center' }}>Error fetching repositories</Text>}
+
+      {loading && (
+        <Text
+          style={{
+            color: isDarkMode ? 'white' : 'black',
+            textAlign: 'center',
+          }}
+        >
+          Loading...
+        </Text>
+      )}
+      {error && (
+        <Text
+          style={{
+            color: isDarkMode ? 'white' : 'black',
+            textAlign: 'center',
+          }}
+        >
+          Error fetching repositories
+        </Text>
+      )}
       <FlatList
         data={repositories}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => item?.id?.toString() ?? Math.random().toString()}
         renderItem={({ item }) => (
           <TouchableOpacity
             onPress={() => {
-              navigation.navigate('RepositoryDetails', { repository: item });
+              if (item) {
+                navigation.navigate('RepositoryDetails', { repository: item });
+              }
             }}
           >
-            <View style={[styles.listItem, { backgroundColor: isDarkMode ? '#333' : 'white', }]}>
-              <Text style={[styles.repoName, { color: isDarkMode ? 'white' : 'black', }]}>{item.name}</Text>
-              <Text style={{ color: isDarkMode ? 'white' : 'black' }}>{item.owner.login}</Text>
+            <View
+              style={[
+                styles.listItem,
+                {
+                  backgroundColor: isDarkMode ? '#333' : 'white',
+                },
+              ]}
+            >
+              <Text
+                style={[
+                  styles.repoName,
+                  {
+                    color: isDarkMode ? 'white' : 'black',
+                  },
+                ]}
+              >
+                {item?.name ?? 'Unnamed Repository'}
+              </Text>
+              <Text style={{ color: isDarkMode ? 'white' : 'black' }}>
+                {item?.owner?.login ?? 'Unknown Owner'}
+              </Text>
             </View>
           </TouchableOpacity>
         )}
@@ -114,10 +175,10 @@ export default function HomeScreen({ navigation }) {
     </SafeAreaView>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-
   },
   appBar: {
     flexDirection: 'row',
@@ -126,7 +187,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: StatusBar.currentHeight || 16,
     paddingBottom: 16,
-
     elevation: 4,
   },
   appBarTitle: {
@@ -145,7 +205,6 @@ const styles = StyleSheet.create({
     flex: 1,
     marginRight: 10,
     paddingLeft: 8,
-
   },
   listItem: {
     padding: 15,

@@ -11,6 +11,7 @@ import {
   Switch,
   PushNotificationIOS,
   Platform,
+  StatusBar,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -176,7 +177,7 @@ const App = () => {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#FFCCCB' }}>
-
+      <StatusBar barStyle="dark-content" backgroundColor="#FFCCCB" />
       <View style={{ flex: 1 }}>
         <ScrollView >
           <View style={styles.appBar}>

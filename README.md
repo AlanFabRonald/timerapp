@@ -1,66 +1,84 @@
-# Task Manager App with Local Storage & Notifications
+# GitHub Explorer Mobile App
 
-This project focuses on developing a **Task Manager App** using **React Native**. The app will allow users to manage tasks—create, edit, delete, and mark them as completed. Tasks will be stored locally using **AsyncStorage** or **SQLite**, and users can set reminders with **local push notifications**. The app will feature a clean, user-friendly interface and retain tasks even after closing the app.
+## Objective
+
+The GitHub Explorer Mobile App allows users to search for GitHub repositories, view their details, and mark repositories as favorites. The app is built using React Native and the GitHub REST API.
+
+---
 
 ## Features
-- **Task Management**: Create, edit, delete, and mark tasks as completed.
-- **Persistent Storage**: Store tasks locally using AsyncStorage or SQLite.
-- **Notifications**: Set local push notifications to remind users of tasks.
-- **User-Friendly UI**: A clean, intuitive interface for easy task management.
 
-## Task Input Fields
-- **Task Title**: Required
-- **Description**: Optional
-- **Due Date & Time**: Required
-- **Priority**: Low, Medium, High
-- **Category**: Work, Personal, etc.
-- **Reminder Notification**: Toggle switch to enable/disable.
+1. **Search for Repositories**:
+   - A search bar where users can type the name of a repository.
+   - Fetches and displays a list of repositories matching the search query using the GitHub REST API.
 
----
+2. **Repository Details**:
+   - Displays detailed information about each repository, including:
+     - Repository name
+     - Description
+     - Number of stars
+     - Number of forks
+     - Primary programming language
+     - Owner's username and avatar
 
-## Steps to Set Up and Run the App
+3. **Favorites**:
+   - Users can mark repositories as "favorites."
+   - A separate screen is provided to view the list of favorite repositories.
 
-### Step 1: Install Dependencies
-Run the following command to install the required packages:
-```bash
-npm install
-```
+4. **Responsive Design**:
+   - The app is designed to work seamlessly across different screen sizes.
 
-### Step 2: Run the App in Debug Mode
-Start the Metro Bundler:
-```bash
-npm start
-```
-or
-```bash
-npx react-native start
-```
-
-Run the app on an Android device/emulator:
-```bash
-npx react-native run-android
-```
-
-Run the app on an iOS simulator (macOS only):
-```bash
-npx react-native run-ios
-```
-
-### Step 3: Build the App in Release Mode (Android)
-To generate a release APK, run:
-```bash
-cd android
-./gradlew assembleRelease
-```
+5. **Error Handling**:
+   - Gracefully handles errors such as no internet connection or no repositories found.
 
 ---
 
-## Conclusion
-You have successfully set up and run your **Task Manager App** using React Native.
+## Technical Requirements
 
-For more information, check out these resources:
-- [React Native Documentation](https://reactnative.dev/docs/getting-started)
-- [AsyncStorage Documentation](https://react-native-async-storage.github.io/async-storage/)
-- [SQLite Documentation](https://www.sqlitetutorial.net/)
-- [React Native Push Notifications](https://www.npmjs.com/package/react-native-push-notification)
+- **React Native**: Built using React Native framework.
+- **GitHub REST API**: Used for fetching repository data from the GitHub API.
+  - **Search Repositories Endpoint**: `https://api.github.com/search/repositories?q={query}`
+- **State Management**: Uses Redux for managing the state of the app (favorites, search results, etc.).
+- **Navigation**: Implemented using React Navigation for handling multiple screens.
+- **Styling**: Styled using React Native components and custom CSS.
+
+---
+
+## Installation and Setup
+
+To set up the project locally, follow these steps:
+
+1. Clone the repository:
+   ```bash
+   git clone <repository-url>
+   cd GitHub-Explorer-App
+   ```
+
+2. Install the dependencies:
+   ```bash
+   npm install
+   ```
+
+3. To run the app in **debug mode** on an Android device or emulator:
+   ```bash
+   npx react-native run-android
+   ```
+
+4. To create a **release build** of the app (APK file):
+   ```bash
+   cd android
+   ./gradlew assembleRelease
+   ```
+   The APK file will be generated in `android/app/build/outputs/apk/release/`.
+
+---
+
+## Usage
+
+- **Search for Repositories**: Enter a repository name in the search bar and press search to view matching repositories.
+- **View Repository Details**: Tap on a repository to view detailed information.
+- **Favorite a Repository**: In the repository details view, tap "Add to Favorites" or "Remove from Favorites" to toggle favorites.
+- **View Favorite Repositories**: Navigate to the Favorites screen to view your saved repositories.
+
+---
 
